@@ -178,6 +178,12 @@ static void bt_ready(int err)
 	}
 
 	if (!mesh_is_initialized()) {
+		char name[CONFIG_BT_DEVICE_NAME_MAX];
+
+		snprintk(name, sizeof(name), "%s,Team %u,Node %u",
+			 CONFIG_BT_DEVICE_NAME, TEAM, NODE);
+		bt_set_name(name);
+
 		/* Start advertising */
 		err = bt_le_adv_start(BT_LE_ADV_CONN_NAME,
 				      ad, ARRAY_SIZE(ad), NULL, 0);
@@ -205,6 +211,7 @@ void main(void)
 	}
 
 	printk("Starting Board Demo\n");
+	printk("Team %u Node %u\n", TEAM, NODE);
 
 	/* Initialize the Bluetooth Subsystem */
 	err = bt_enable(bt_ready);
