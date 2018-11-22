@@ -60,8 +60,9 @@ static void configure_gpios(void)
 
 int set_led_state(u8_t id, bool state)
 {
+	/* Pin set low turns on LED's on the reel board */
 	return gpio_pin_write(led_dev_info[id].dev, led_dev_info[id].pin,
-			      state);
+			      !state);
 }
 
 int get_hdc1010_val(struct sensor_value *val)

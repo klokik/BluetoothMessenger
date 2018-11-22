@@ -153,10 +153,8 @@ static void gen_onoff_set_unack(struct bt_mesh_model *model,
 	printk("addr 0x%02x state 0x%02x\n",
 	       bt_mesh_model_elem(model)->addr, state->current);
 
-	/* Pin set low turns on LED's on the reel board */
 	if (set_led_state(state->dev_id, onoff)) {
 		printk("Failed to set led state\n");
-
 		return;
 	}
 
