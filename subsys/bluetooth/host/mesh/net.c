@@ -73,6 +73,13 @@ static struct friend_cred friend_cred[FRIEND_CRED_COUNT];
 static u64_t msg_cache[CONFIG_BT_MESH_MSG_CACHE_SIZE];
 static u16_t msg_cache_next;
 
+static bt_mesh_stat_relay_cb_t stat_relay_cb;
+
+void bt_mesh_stat_set_relay_cb(bt_mesh_stat_relay_cb_t cb)
+{
+	stat_relay_cb = cb;
+}
+
 /* Singleton network context (the implementation only supports one) */
 struct bt_mesh_net bt_mesh = {
 	.local_queue = SYS_SLIST_STATIC_INIT(&bt_mesh.local_queue),
@@ -1160,6 +1167,11 @@ static void bt_mesh_net_relay(struct net_buf_simple *sbuf,
 
 	BT_DBG("TTL %u CTL %u dst 0x%04x", rx->ctx.recv_ttl, rx->ctl,
 	       rx->ctx.recv_dst);
+
+	if (stat_relay_cb) {
+		stat_relay_cb(rx->sub->net_idx, rx->ctx.addr, rx->ctx.recv_dst,
+			      rx->ctx.recv_ttl);
+	}
 
 	/* The Relay Retransmit state is only applied to adv-adv relaying.
 	 * Anything else (like GATT to adv, or locally originated packets)
