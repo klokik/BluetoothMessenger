@@ -311,6 +311,7 @@ static void vnd_hello(struct bt_mesh_model *model,
 		      struct net_buf_simple *buf)
 {
 	char str[32];
+	size_t len;
 
 	printk("Hello message from 0x%04x\n", ctx->addr);
 
@@ -319,8 +320,9 @@ static void vnd_hello(struct bt_mesh_model *model,
 		return;
 	}
 
-	strncpy(str, buf->data, HELLO_MAX);
-	str[HELLO_MAX] = '\0';
+	len = min(buf->len, HELLO_MAX);
+	memcpy(str, buf->data, len);
+	str[len] = '\0';
 
 	board_add_hello(ctx->addr, str);
 
