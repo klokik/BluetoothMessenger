@@ -71,7 +71,7 @@ static void heartbeat(u8_t hops, u16_t feat)
 }
 
 static struct bt_mesh_cfg_srv cfg_srv = {
-	.relay = BT_MESH_RELAY_DISABLED,
+	.relay = BT_MESH_RELAY_ENABLED,
 	.beacon = BT_MESH_BEACON_DISABLED,
 	.default_ttl = DEFAULT_TTL,
 
@@ -330,7 +330,9 @@ static void vnd_hello(struct bt_mesh_model *model,
 
 	board_add_hello(ctx->addr, str);
 
-	strcat(str, " says hi!");
+	strcat(str, " needs HELP!");
+	printk("#EMERG:%s\n",str);
+
 	board_show_text(str, false, K_SECONDS(3));
 
 	board_blink_leds();
@@ -357,7 +359,8 @@ static void vnd_some_text(struct bt_mesh_model *model,
 	board_add_hello(ctx->addr, str);
 
 	// strcat(str, " says fuck you!");
-	board_show_text(str, false, K_SECONDS(3));
+	// board_show_text(str, false, K_SECONDS(3));
+	board_show_text(str, false, K_FOREVER);
 
 	board_blink_leds();
 }
@@ -450,11 +453,33 @@ static void send_hello(struct k_work *work)
 			       min(HELLO_MAX, first_name_len(name)));
 
 	if (bt_mesh_model_send(&vnd_models[0], &ctx, &msg, NULL, NULL) == 0) {
-		board_show_text("Saying \"hi!\" to everyone", false,
+		board_show_text("Calling for help to everyone", false,
 				K_SECONDS(2));
 	} else {
 		board_show_text("Sending Failed!", false, K_SECONDS(2));
 	}
+
+	// {
+	// 	NET_BUF_SIMPLE_DEFINE(msg, 3 + HELLO_MAX + 4);
+	// 	struct bt_mesh_msg_ctx ctx = {
+	// 		.net_idx = NET_IDX,
+	// 		.app_idx = APP_IDX,
+	// 		.addr = GROUP_ADDR,
+	// 		.send_ttl = DEFAULT_TTL,
+	// 	};
+	// 	const char *name = bt_get_name();
+
+	// 	bt_mesh_model_msg_init(&msg, 0x0fdf105);
+	// 	net_buf_simple_add_mem(&msg, name,
+	// 			       min(HELLO_MAX, first_name_len(name)));
+
+	// 	if (bt_mesh_model_send(&vnd_models[0], &ctx, &msg, NULL, NULL) == 0) {
+	// 		// board_show_text("Calling for help to everyone", false,
+	// 		// 		K_SECONDS(2));
+	// 	} else {
+	// 		board_show_text("Sending Failed!", false, K_SECONDS(2));
+	// 	}
+	// }
 }
 
 /*static void send_string(struct k_work *work)

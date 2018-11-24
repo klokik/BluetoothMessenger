@@ -43,9 +43,22 @@
 	gpio_keys {
 		compatible = "gpio-keys";
 		user_button: button_0 {
-			gpios = <&gpio0 7 GPIO_PUD_PULL_UP>;
+			// gpios = <&gpio0 7 GPIO_PUD_PULL_UP>;
+			gpios = <&gpio0 9 GPIO_PUD_PULL_UP>;
 			label = "User Button";
 		};
+		// button_cancel: button_0 {
+		// 	gpios = <&gpio0 7 GPIO_PUD_PULL_UP>;
+		// 	label = "User Button";
+		// };
+		// button_ok: button_0 {
+		// 	gpios = <&gpio0 7 GPIO_PUD_PULL_UP>;
+		// 	label = "User Button";
+		// };
+		// button_: button_0 {
+		// 	gpios = <&gpio0 7 GPIO_PUD_PULL_UP>;
+		// 	label = "User Button";
+		// };
 	};
 
 	aliases {
