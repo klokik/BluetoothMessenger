@@ -20,7 +20,9 @@
 #define MOD_LF            0x0000
 #define OP_HELLO          0xbb
 #define OP_HEARTBEAT      0xbc
+#define OP_SOME_TEXT      0xbe
 #define OP_VND_HELLO      BT_MESH_MODEL_OP_3(OP_HELLO, BT_COMP_ID_LF)
+#define OP_VND_SOME_TEXT  BT_MESH_MODEL_OP_3(OP_SOME_TEXT, BT_COMP_ID_LF)
 #define OP_VND_HEARTBEAT  BT_MESH_MODEL_OP_3(OP_HEARTBEAT, BT_COMP_ID_LF)
 
 #define DEFAULT_TTL       31
@@ -314,6 +316,8 @@ static void vnd_hello(struct bt_mesh_model *model,
 	size_t len;
 
 	printk("Hello message from 0x%04x\n", ctx->addr);
+	printk("Hello OP code: 0x%08x\n", OP_VND_HELLO);
+	printk("Some text OP code: 0x%08x\n", OP_VND_SOME_TEXT);
 
 	if (ctx->addr == bt_mesh_model_elem(model)->addr) {
 		printk("Ignoring message from self\n");
@@ -331,6 +335,33 @@ static void vnd_hello(struct bt_mesh_model *model,
 
 	board_blink_leds();
 }
+
+static void vnd_some_text(struct bt_mesh_model *model,
+		      struct bt_mesh_msg_ctx *ctx,
+		      struct net_buf_simple *buf)
+{
+	char str[64];
+	size_t len;
+
+	printk("Emergency message from 0x%04x\n", ctx->addr);
+
+	if (ctx->addr == bt_mesh_model_elem(model)->addr) {
+		printk("Ignoring message from self\n");
+		return;
+	}
+
+	len = min(buf->len, 64);
+	memcpy(str, buf->data, len);
+	str[len] = '\0';
+
+	board_add_hello(ctx->addr, str);
+
+	// strcat(str, " says fuck you!");
+	board_show_text(str, false, K_SECONDS(3));
+
+	board_blink_leds();
+}
+
 
 static void vnd_heartbeat(struct bt_mesh_model *model,
 			  struct bt_mesh_msg_ctx *ctx,
@@ -354,6 +385,7 @@ static void vnd_heartbeat(struct bt_mesh_model *model,
 
 static const struct bt_mesh_model_op vnd_ops[] = {
 	{ OP_VND_HELLO, 1, vnd_hello },
+	{ OP_VND_SOME_TEXT, 1, vnd_some_text },
 	{ OP_VND_HEARTBEAT, 1, vnd_heartbeat },
 	BT_MESH_MODEL_OP_END,
 };
@@ -424,6 +456,29 @@ static void send_hello(struct k_work *work)
 		board_show_text("Sending Failed!", false, K_SECONDS(2));
 	}
 }
+
+/*static void send_string(struct k_work *work)
+{
+	NET_BUF_SIMPLE_DEFINE(msg, 3 + HELLO_MAX + 4);
+	struct bt_mesh_msg_ctx ctx = {
+		.net_idx = NET_IDX,
+		.app_idx = APP_IDX,
+		.addr = GROUP_ADDR,
+		.send_ttl = DEFAULT_TTL,
+	};
+	const char *name = bt_get_name();
+
+	bt_mesh_model_msg_init(&msg, OP_VND_HELLO);
+	net_buf_simple_add_mem(&msg, name,
+			       min(HELLO_MAX, first_name_len(name)));
+
+	if (bt_mesh_model_send(&vnd_models[0], &ctx, &msg, NULL, NULL) == 0) {
+		board_show_text("Saying \"hi!\" to everyone", false,
+				K_SECONDS(2));
+	} else {
+		board_show_text("Sending Failed!", false, K_SECONDS(2));
+	}
+}*/
 
 void mesh_send_hello(void)
 {
