@@ -57,8 +57,10 @@ struct font_info {
 
 static struct device *epd_dev;
 static bool pressed;
+static bool presseds[11];
 static u8_t screen_id = SCREEN_MAIN;
 static struct device *gpio;
+static struct device *gpios[11];
 static struct k_delayed_work epd_work;
 static struct k_delayed_work long_press_work;
 static char str_buf[256];
@@ -452,6 +454,43 @@ static bool button_is_pressed(void)
 	return !val;
 }
 
+/*static const char* key_controllers[] = {
+	SW1_GPIO_CONTROLLER,
+	SW2_GPIO_CONTROLLER,
+	SW3_GPIO_CONTROLLER,
+	SW4_GPIO_CONTROLLER,
+	SW5_GPIO_CONTROLLER,
+	SW6_GPIO_CONTROLLER,
+	SW7_GPIO_CONTROLLER,
+	SW8_GPIO_CONTROLLER,
+	SW9_GPIO_CONTROLLER,
+	SWOK_GPIO_CONTROLLER,
+	SWX_GPIO_CONTROLLER,
+};
+
+static const int key_pins[] = {
+	SW1_GPIO_PIN,
+	SW2_GPIO_PIN,
+	SW3_GPIO_PIN,
+	SW4_GPIO_PIN,
+	SW5_GPIO_PIN,
+	SW6_GPIO_PIN,
+	SW7_GPIO_PIN,
+	SW8_GPIO_PIN,
+	SW9_GPIO_PIN,
+	SWOK_GPIO_PIN,
+	SWX_GPIO_PIN,
+};
+
+static bool button_n_is_pressed(int n)
+{
+	u32_t val;
+
+	gpio_pin_read(gpios[n], key_pins[n], &val);
+
+	return !val;
+}*/
+
 static void button_interrupt(struct device *dev, struct gpio_callback *cb,
 			     u32_t pins)
 {
@@ -488,6 +527,87 @@ static void button_interrupt(struct device *dev, struct gpio_callback *cb,
 	}
 }
 
+/*#define n_callback(num) (button_##num##_interrupt)
+
+#define n_callback_(num) \
+static void button_##num##_interrupt(struct device *dev, struct gpio_callback *cb, u32_t pins) { \
+	if (button_n_is_pressed(num) == presseds[num]) { \
+		return; \
+	} \
+	presseds[num] = !presseds[num];\
+	printk("Button %d %s\n", num+1, presseds[num] ? "pressed" : "released");\
+	switch (screen_id) {\
+	case SCREEN_SENSORS:\
+	case SCREEN_STATS:\
+		return;\
+	case SCREEN_MAIN:\
+		if (presseds[num]) {\
+			if (num == 0)\
+				mesh_send_string("I'm Good!");\
+			else if (num == 1)\
+				mesh_send_string("Send help!");\
+			else if (num == 2)\
+				mesh_send_string("I'm in danger!");\
+			else if (num == 3)\
+				mesh_send_string("I've found him/help");\
+			else if (num == 4)\
+				mesh_send_string("RUN FOR YOUR LIVES");\
+			else if (num == 5)\
+				mesh_send_string("WE ARE FUCKED");\
+		}\
+		return;\
+	default:\
+		return;\
+	}\
+}
+
+n_callback_(0)
+n_callback_(1)
+n_callback_(2)
+n_callback_(3)
+n_callback_(4)
+n_callback_(5)
+n_callback_(6)
+n_callback_(7)
+n_callback_(8)
+n_callback_(9)
+n_callback_(10)
+
+
+static int configure_buttons(void) {
+	static struct gpio_callback button_cbs[11];
+
+	for (int i = 0; i < 11; ++i) {
+		gpios[i] = device_get_binding(key_controllers[i]);
+		if (!gpios[i]) {
+			return -ENODEV;
+		}
+
+		int pin = key_pins[i];
+
+		gpio_pin_configure(gpios[i], pin, (GPIO_DIR_IN | GPIO_INT |  PULL_UP | EDGE));
+
+		switch(i) {
+			case 0: gpio_init_callback(&button_cbs[i], n_callback(0), BIT(pin)); break;
+			case 1: gpio_init_callback(&button_cbs[i], n_callback(1), BIT(pin)); break;
+			case 2: gpio_init_callback(&button_cbs[i], n_callback(2), BIT(pin)); break;
+			case 3: gpio_init_callback(&button_cbs[i], n_callback(3), BIT(pin)); break;
+			case 4: gpio_init_callback(&button_cbs[i], n_callback(4), BIT(pin)); break;
+			case 5: gpio_init_callback(&button_cbs[i], n_callback(5), BIT(pin)); break;
+			case 6: gpio_init_callback(&button_cbs[i], n_callback(6), BIT(pin)); break;
+			case 7: gpio_init_callback(&button_cbs[i], n_callback(7), BIT(pin)); break;
+			case 8: gpio_init_callback(&button_cbs[i], n_callback(8), BIT(pin)); break;
+			case 9: gpio_init_callback(&button_cbs[i], n_callback(9), BIT(pin)); break;
+			case 10: gpio_init_callback(&button_cbs[i], n_callback(10), BIT(pin)); break;
+		}
+		gpio_add_callback(gpios[i], &button_cbs[i]);
+
+		gpio_pin_enable_callback(gpios[i], pin);
+	}
+
+	return 0;
+}*/
+
 static int configure_button(void)
 {
 	static struct gpio_callback button_cb;
@@ -505,7 +625,7 @@ static int configure_button(void)
 
 	gpio_pin_enable_callback(gpio, SW0_GPIO_PIN);
 
-	return 0;
+	return 0;// || configure_buttons();
 }
 
 static void led_timeout(struct k_work *work)
@@ -595,6 +715,8 @@ int board_init(void)
 	k_delayed_work_init(&long_press_work, long_press);
 
 	pressed = button_is_pressed();
+	// for (int i = 0; i < 11; ++i)
+	// 	presseds[i] = button_n_is_pressed(i);
 	if (pressed) {
 		printk("Erasing storage\n");
 		board_show_text("Resetting Device", false, K_SECONDS(4));

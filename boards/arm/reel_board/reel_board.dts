@@ -43,21 +43,52 @@
 	gpio_keys {
 		compatible = "gpio-keys";
 		user_button: button_0 {
-			// gpios = <&gpio0 7 GPIO_PUD_PULL_UP>;
-			gpios = <&gpio0 9 GPIO_PUD_PULL_UP>;
+			gpios = <&gpio0 7 GPIO_PUD_PULL_UP>;
 			label = "User Button";
 		};
-		// button_cancel: button_0 {
-		// 	gpios = <&gpio0 7 GPIO_PUD_PULL_UP>;
-		// 	label = "User Button";
+		// button_u1: button_1 {
+		// 	gpios = <&gpio0 3 GPIO_PUD_PULL_UP>;
+		// 	label = "User Button 1";
 		// };
-		// button_ok: button_0 {
-		// 	gpios = <&gpio0 7 GPIO_PUD_PULL_UP>;
-		// 	label = "User Button";
+		// button_u2: button_2 {
+		// 	gpios = <&gpio0 5 GPIO_PUD_PULL_UP>;
+		// 	label = "User Button 2";
 		// };
-		// button_: button_0 {
-		// 	gpios = <&gpio0 7 GPIO_PUD_PULL_UP>;
-		// 	label = "User Button";
+		// button_u3: button_3 {
+		// 	gpios = <&gpio1 15 GPIO_PUD_PULL_UP>;
+		// 	label = "User Button 3";
+		// };
+		// button_u4: button_4 {
+		// 	gpios = <&gpio0 30 GPIO_PUD_PULL_UP>;
+		// 	label = "User Button 4";
+		// };
+		// button_u5: button_5 {
+		// 	gpios = <&gpio1 13 GPIO_PUD_PULL_UP>;
+		// 	label = "User Button 5";
+		// };
+		// button_u6: button_6 {
+		// 	gpios = <&gpio1 14 GPIO_PUD_PULL_UP>;
+		// 	label = "User Button 6";
+		// };
+		// button_u7: button_7 {
+		// 	gpios = <&gpio0 10 GPIO_PUD_PULL_UP>;
+		// 	label = "User Button 7";
+		// };
+		// button_u8: button_8 {
+		// 	gpios = <&gpio1 1 GPIO_PUD_PULL_UP>;
+		// 	label = "User Button 8";
+		// };
+		// button_u9: button_9 {
+		// 	gpios = <&gpio0 2 GPIO_PUD_PULL_UP>;
+		// 	label = "User Button 9";
+		// };
+		// button_uOK: button_OK {
+		// 	gpios = <&gpio0 9 GPIO_PUD_PULL_UP>;
+		// 	label = "User Button OK";
+		// };
+		// button_uX: button_X {
+		// 	gpios = <&gpio0 29 GPIO_PUD_PULL_UP>;
+		// 	label = "User Button X";
 		// };
 	};
 
@@ -67,6 +98,17 @@
 		led2 = &green_led;
 		led3 = &blue_led;
 		sw0 = &user_button;
+		// sw1 = &button_u1;
+		// sw2 = &button_u2;
+		// sw3 = &button_u3;
+		// sw4 = &button_u4;
+		// sw5 = &button_u5;
+		// sw6 = &button_u6;
+		// sw7 = &button_u7;
+		// sw8 = &button_u8;
+		// sw9 = &button_u9;
+		// swOK = &button_uOK;
+		// swX = &button_uX;
 	};
 };
 

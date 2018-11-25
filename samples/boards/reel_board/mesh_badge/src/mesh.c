@@ -5,6 +5,7 @@
  */
 
 #include <zephyr.h>
+#include <stdio.h>
 #include <string.h>
 #include <misc/printk.h>
 
@@ -58,6 +59,7 @@ struct sensor_hdr_b {
 } __packed;
 
 static struct k_work hello_work;
+static struct k_work string_work;
 static struct k_work mesh_start_work;
 
 /* Definitions of models user data (Start) */
@@ -458,57 +460,48 @@ static void send_hello(struct k_work *work)
 	} else {
 		board_show_text("Sending Failed!", false, K_SECONDS(2));
 	}
-
-	// {
-	// 	NET_BUF_SIMPLE_DEFINE(msg, 3 + HELLO_MAX + 4);
-	// 	struct bt_mesh_msg_ctx ctx = {
-	// 		.net_idx = NET_IDX,
-	// 		.app_idx = APP_IDX,
-	// 		.addr = GROUP_ADDR,
-	// 		.send_ttl = DEFAULT_TTL,
-	// 	};
-	// 	const char *name = bt_get_name();
-
-	// 	bt_mesh_model_msg_init(&msg, 0x0fdf105);
-	// 	net_buf_simple_add_mem(&msg, name,
-	// 			       min(HELLO_MAX, first_name_len(name)));
-
-	// 	if (bt_mesh_model_send(&vnd_models[0], &ctx, &msg, NULL, NULL) == 0) {
-	// 		// board_show_text("Calling for help to everyone", false,
-	// 		// 		K_SECONDS(2));
-	// 	} else {
-	// 		board_show_text("Sending Failed!", false, K_SECONDS(2));
-	// 	}
-	// }
 }
 
-/*static void send_string(struct k_work *work)
-{
-	NET_BUF_SIMPLE_DEFINE(msg, 3 + HELLO_MAX + 4);
-	struct bt_mesh_msg_ctx ctx = {
-		.net_idx = NET_IDX,
-		.app_idx = APP_IDX,
-		.addr = GROUP_ADDR,
-		.send_ttl = DEFAULT_TTL,
-	};
-	const char *name = bt_get_name();
+// static char string_message_buf[64];
 
-	bt_mesh_model_msg_init(&msg, OP_VND_HELLO);
-	net_buf_simple_add_mem(&msg, name,
-			       min(HELLO_MAX, first_name_len(name)));
+// static void send_string(struct k_work *work)
+// {
+// 	NET_BUF_SIMPLE_DEFINE(msg, 3 + 32 + 4);
+// 	struct bt_mesh_msg_ctx ctx = {
+// 		.net_idx = NET_IDX,
+// 		.app_idx = APP_IDX,
+// 		.addr = GROUP_ADDR,
+// 		.send_ttl = DEFAULT_TTL,
+// 	};
+// 	const char *name = &string_message_buf[0];
 
-	if (bt_mesh_model_send(&vnd_models[0], &ctx, &msg, NULL, NULL) == 0) {
-		board_show_text("Saying \"hi!\" to everyone", false,
-				K_SECONDS(2));
-	} else {
-		board_show_text("Sending Failed!", false, K_SECONDS(2));
-	}
-}*/
+// 	bt_mesh_model_msg_init(&msg, OP_VND_SOME_TEXT);
+// 	net_buf_simple_add_mem(&msg, name,
+// 			       min(32, strlen(name)));
+
+// 	char scrbuf[48];
+// 	sprintf(&scrbuf[0], "Saying \"%s\"", name);
+// 	printk("%s", &scrbuf[0]);
+
+// 	if (bt_mesh_model_send(&vnd_models[0], &ctx, &msg, NULL, NULL) == 0) {
+// 		board_show_text(&scrbuf[0], false, K_SECONDS(2));
+// 	} else {
+// 		board_show_text("Sending Failed!", false, K_SECONDS(2));
+// 	}
+// }
 
 void mesh_send_hello(void)
 {
 	k_work_submit(&hello_work);
 }
+
+// void mesh_send_string(const char *str)
+// {
+// 	string_message_buf[0] = '\0';
+// 	strcat(&string_message_buf[0], str);
+
+// 	k_work_submit(&string_work);
+// }
 
 static int provision_and_configure(void)
 {
@@ -618,6 +611,7 @@ int mesh_init(void)
 	};
 
 	k_work_init(&hello_work, send_hello);
+	// k_work_init(&string_work, send_string);
 	k_work_init(&mesh_start_work, start_mesh);
 
 	return bt_mesh_init(&prov, &comp);
